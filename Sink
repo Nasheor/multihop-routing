@@ -10,7 +10,7 @@
 
 /* This is the structure of broadcast messages. */
 struct broadcast_message {
-  uint8_t seqno;
+  int seqno;
   int  hop;
 };
 /*---------------------------------------------------------------------------*/
@@ -31,15 +31,15 @@ static struct broadcast_conn broadcast;
 PROCESS_THREAD(broadcast_process, ev, data)
 {
 static struct etimer et;
-static uint8_t seqno;
+static int seqno = 0;
 struct broadcast_message msg; 
 PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
 PROCESS_BEGIN();
 
 broadcast_open(&broadcast, 140, &broadcast_call);
-unicast_open(&uc, 130, &unicast_callbacks);
-struct broadcast_message *message = calloc(sizeof(struct broadcast_message), 1);
+
+//struct broadcast_message *message = calloc(sizeof(struct broadcast_message), 1);
 while(1) {
 
 /* Delay 5-10 seconds */
@@ -49,10 +49,10 @@ PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
 msg.seqno = seqno; 
 msg.hop = 0;
-packetbuf_copyfrom(message, sizeOf(struct broadcast_message));
+packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
 broadcast_send(&broadcast);
 printf("Broadcast message sent\n");
-broadcast_send(&broadcast)
+broadcast_send(&broadcast);
 seqno++;
 }
 
