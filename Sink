@@ -51,7 +51,7 @@ msg.seqno = seqno;
 msg.hop = 0;
 packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
 broadcast_send(&broadcast);
-printf("Broadcast message sent\n");
+printf("Broadcast message sent From Sink\n");
 broadcast_send(&broadcast);
 seqno++;
 }
