@@ -10,62 +10,50 @@
 
 /* This is the structure of broadcast messages. */
 struct broadcast_message {
-  int seqno; 
+  int seqno;
   int  hop;
 };
-
-struct broadcast_message status;
-
-static linkaddr_t parent; 
-static linkaddr_t sink;
-
-
 /*---------------------------------------------------------------------------*/
-PROCESS(broadcast_process, "Node Process");
+PROCESS(broadcast_process, "Broadcast example");
 AUTOSTART_PROCESSES(&broadcast_process);
 /*---------------------------------------------------------------------------*/
-
-static struct broadcast_conn broadcast;
 
 static void
 broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from)
 {
 
-    struct broadcast_message *m;
-    m = packetbuf_dataptr(); 
-    if(m->hop == 0){
-      sink.u8[0] = from-> u8[0];
-      sink.u8[1] = from-> u8[0];
-      status.hop = m->hop+1;
-      status.seqno = m->seqno;
-    }
-    else if(status.seqno<=m->seqno || (sink.u8[0] == from -> u8[0] && sink.u8[1] == from -> u8[1])){
-      status.hop = m->hop;
-      status.seqno = m->seqno;
-      parent.u8[0] = from->u8[0];
-      parent.u8[1] = from->u8[1];
-      status.hop = m -> hop + 1;
-      printf("Hop Count: %d\nSequence Number: %d\n", m->hop, m->seqno);
-    }
-    packetbuf_copyfrom(&status, sizeof(struct broadcast_message));
-    broadcast_send(&broadcast);
-    printf("Broadcast message sent from Node\n");
-    broadcast_send(&broadcast);
 }
-
 static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
-
+static struct broadcast_conn broadcast;
 /*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(broadcast_process, ev, data)
 {
-
+static struct etimer et;
+static int seqno = 0;
+struct broadcast_message msg; 
 PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
 PROCESS_BEGIN();
 
 broadcast_open(&broadcast, 140, &broadcast_call);
+
+//struct broadcast_message *message = calloc(sizeof(struct broadcast_message), 1);
+while(1) {
+
+/* Delay 5-10 seconds */
+etimer_set(&et, CLOCK_SECOND * 5 + random_rand() % (CLOCK_SECOND * 4));
+
+PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+
+msg.seqno = seqno; 
+msg.hop = 0;
+packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
+printf("Broadcast message sent From Sink\n");
+broadcast_send(&broadcast);
+seqno++;
+}
 
 PROCESS_END();
 }
