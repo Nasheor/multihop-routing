@@ -33,7 +33,7 @@ broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from)
 
     struct broadcast_message *m;
     m = packetbuf_dataptr(); 
-    if(m->hop == 0){
+    if(m->hop == 0 || (sink.u8[0] == from -> u8[0] && sink.u8[1] == from-> u8[1])){
       printf("Hop Count: %d\nSequence Number: %d\n", m->hop, m->seqno);
       sink.u8[0] = from-> u8[0];
       sink.u8[1] = from-> u8[0];
