@@ -34,23 +34,27 @@ broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from)
     struct broadcast_message *m;
     m = packetbuf_dataptr(); 
     if(m->hop == 0){
+      printf("Hop Count: %d\nSequence Number: %d\n", m->hop, m->seqno);
       sink.u8[0] = from-> u8[0];
       sink.u8[1] = from-> u8[0];
       status.hop = m->hop+1;
       status.seqno = m->seqno;
+      packetbuf_copyfrom(&status, sizeof(struct broadcast_message));
+      broadcast_send(&broadcast);
     }
-    else if(status.seqno<=m->seqno || (sink.u8[0] == from -> u8[0] && sink.u8[1] == from -> u8[1])){
+    else if(m->seqno > status.seqno || (parent.u8[0] == from -> u8[0] && parent.u8[1] == from -> u8[1])){
+      printf("Hop Count: %d\nSequence Number: %d\n", m->hop, m->seqno);
       status.hop = m->hop;
       status.seqno = m->seqno;
       parent.u8[0] = from->u8[0];
       parent.u8[1] = from->u8[1];
       status.hop = m -> hop + 1;
-      printf("Hop Count: %d\nSequence Number: %d\n", m->hop, m->seqno);
+      packetbuf_copyfrom(&status, sizeof(struct broadcast_message));
+      broadcast_send(&broadcast);
     }
-    packetbuf_copyfrom(&status, sizeof(struct broadcast_message));
-    broadcast_send(&broadcast);
-    printf("Broadcast message sent from Node\n");
-    broadcast_send(&broadcast);
+    else{
+      //printf("Waiting for an Updated Sequence Number");
+    }
 }
 
 static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
