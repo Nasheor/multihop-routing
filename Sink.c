@@ -13,6 +13,7 @@ struct broadcast_message {
   int seqno;
   int  hop;
 };
+
 /*---------------------------------------------------------------------------*/
 PROCESS(broadcast_process, "Broadcast example");
 AUTOSTART_PROCESSES(&broadcast_process);
@@ -53,6 +54,14 @@ packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
 printf("Broadcast message sent From Sink\n");
 broadcast_send(&broadcast);
 seqno++;
+
+if(seqno>25){
+  msg.seqno = 0;
+  msg.hop = 0;
+  packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
+  printf("Broadcast message sent From Sink\n");
+  broadcast_send(&broadcast);
+}
 }
 
 PROCESS_END();
