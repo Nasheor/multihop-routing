@@ -59,7 +59,7 @@ while(1) {
     packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
     printf("Broadcast message sent From Sink\n");
     broadcast_send(&broadcast);
-    printf("Wipe Message Sent");
+    printf("Wipe Message Sent\n");
     seqno = 0;
    /* Delay 5-10 seconds */
     // etimer_set(&wt, CLOCK_SECOND * 5 + random_rand() % (CLOCK_SECOND * 4));
