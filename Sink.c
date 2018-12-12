@@ -8,10 +8,13 @@
 
 #include <stdio.h>
 
+typedef enum { false, true } bool;
+
 /* This is the structure of broadcast messages. */
 struct broadcast_message {
   int seqno;
   int  hop;
+  bool wipe;
 };
 
 /*---------------------------------------------------------------------------*/
@@ -32,6 +35,7 @@ static struct broadcast_conn broadcast;
 PROCESS_THREAD(broadcast_process, ev, data)
 {
 static struct etimer et;
+static struct etimer wt;
 static int seqno = 0;
 struct broadcast_message msg; 
 PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
@@ -43,25 +47,35 @@ broadcast_open(&broadcast, 140, &broadcast_call);
 //struct broadcast_message *message = calloc(sizeof(struct broadcast_message), 1);
 while(1) {
 
-/* Delay 5-10 seconds */
-etimer_set(&et, CLOCK_SECOND * 5 + random_rand() % (CLOCK_SECOND * 4));
+  /* Delay 5-10 seconds */
+  etimer_set(&et, CLOCK_SECOND * 5 + random_rand() % (CLOCK_SECOND * 4));
 
-PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
-msg.seqno = seqno; 
-msg.hop = 0;
-packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
-printf("Broadcast message sent From Sink\n");
-broadcast_send(&broadcast);
-seqno++;
+  if(seqno>10){
+    msg.seqno = 0;
+    msg.hop = 0;
+    msg.wipe = true;
+    packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
+    printf("Broadcast message sent From Sink\n");
+    broadcast_send(&broadcast);
+    printf("Wipe Message Sent");
+    seqno = 0;
+   /* Delay 5-10 seconds */
+    // etimer_set(&wt, CLOCK_SECOND * 5 + random_rand() % (CLOCK_SECOND * 4));
 
-if(seqno>25){
-  msg.seqno = 0;
-  msg.hop = 0;
-  packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
-  printf("Broadcast message sent From Sink\n");
-  broadcast_send(&broadcast);
-}
+    // PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&wt));
+
+  }
+  else{
+      msg.seqno = seqno; 
+      msg.hop = 0;
+      msg.hop = false;
+      packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
+      printf("Broadcast message sent From Sink\n");
+      broadcast_send(&broadcast);
+      seqno++;
+  }
 }
 
 PROCESS_END();
