@@ -36,34 +36,26 @@ broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from)
 
     struct broadcast_message *m;
     m = packetbuf_dataptr(); 
-    // if(m->hop == 0 || (sink.u8[0] == from -> u8[0] && sink.u8[1] == from-> u8[1])){
-    //   printf("Message from Sink\n");
-    //   printf("Hop Count: %d\nSequence Number: %d\n", m->hop, m->seqno);
-    //   sink.u8[0] = from-> u8[0];
-    //   sink.u8[1] = from-> u8[0];
-    //   status.hop = m->hop+1;
-    //   status.seqno = m->seqno;
-    //   packetbuf_copyfrom(&status, sizeof(struct broadcast_message));
-    //   broadcast_send(&broadcast);
-    // }
-    if(m->seqno > status.seqno || (parent.u8[0] == from -> u8[0] && parent.u8[1] == from -> u8[1])){
+
+    if((m->seqno > status.seqno) ||(m->wipe == true)){
       if(m -> wipe == true){
         status.hop = 0;
         status.seqno = m -> seqno;
         status.wipe = m -> wipe;
-
       }
-      printf("Hop Count: %d\nSequence Number: %d\n", m->hop, m->seqno);
-      parent.u8[0] = from->u8[0];
-      parent.u8[1] = from->u8[1];
-      status.hop = m -> hop + 1;
-      status.seqno = m->seqno;
-      status.wipe = false;
+      else{
+        parent.u8[0] = from->u8[0];
+        parent.u8[1] = from->u8[1];
+        status.hop = m -> hop + 1;
+        status.seqno = m->seqno;
+        status.wipe = false;
+      }
       packetbuf_copyfrom(&status, sizeof(struct broadcast_message));
       broadcast_send(&broadcast);
+      printf("Hop Count: %d\nSequence Number: %d\n", m->hop, m->seqno);
     }
     else{
-      //printf("Waiting for an Updated Sequence Number");
+      printf("Waiting for an Updated Sequence Number\n");
     }
 }
 

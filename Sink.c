@@ -35,7 +35,6 @@ static struct broadcast_conn broadcast;
 PROCESS_THREAD(broadcast_process, ev, data)
 {
 static struct etimer et;
-static struct etimer wt;
 static int seqno = 0;
 struct broadcast_message msg; 
 PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
@@ -48,24 +47,18 @@ broadcast_open(&broadcast, 140, &broadcast_call);
 while(1) {
 
   /* Delay 5-10 seconds */
-  etimer_set(&et, CLOCK_SECOND * 5 + random_rand() % (CLOCK_SECOND * 4));
+  etimer_set(&et, CLOCK_SECOND * 8 + random_rand() % (CLOCK_SECOND * 8));
 
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
-  if(seqno>10){
+  if(seqno>16){
     msg.seqno = 0;
     msg.hop = 0;
     msg.wipe = true;
     packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
-    printf("Broadcast message sent From Sink\n");
     broadcast_send(&broadcast);
     printf("Wipe Message Sent\n");
     seqno = 0;
-   /* Delay 5-10 seconds */
-    // etimer_set(&wt, CLOCK_SECOND * 5 + random_rand() % (CLOCK_SECOND * 4));
-
-    // PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&wt));
-
   }
   else{
       msg.seqno = seqno; 
