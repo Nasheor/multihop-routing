@@ -51,15 +51,17 @@ while(1) {
 
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
+  //Wipes the Tree every 16 hops, resetting the sequence number and setting wipe state to true
   if(seqno>16){
     msg.seqno = 0;
-    msg.hop = 0;
+    msg.hop = 1;
     msg.wipe = true;
     packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
     broadcast_send(&broadcast);
     printf("Wipe Message Sent\n");
     seqno = 0;
   }
+  //Increase the Sequence number sequentially every time the sink sends out a broadcast message 
   else{
       msg.seqno = seqno; 
       msg.hop = 0;

@@ -33,16 +33,20 @@ static struct broadcast_conn broadcast;
 static void
 broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from)
 {
-
+  //Pointer to our incoming Broadcast message
     struct broadcast_message *m;
     m = packetbuf_dataptr(); 
 
+  //Checks if the Incoming Sequence Number is greater than the currently stored sequence number or state of wipe is true
     if((m->seqno > status.seqno) ||(m->wipe == true)){
+      //If wipe is true, cleans the tree
       if(m -> wipe == true){
         status.hop = 0;
         status.seqno = m -> seqno;
         status.wipe = m -> wipe;
       }
+      //Else Updates teh Sequence Number, increases hop count, sets up the parent node from which the broadcast message was 
+      //received from
       else{
         parent.u8[0] = from->u8[0];
         parent.u8[1] = from->u8[1];
