@@ -1,4 +1,4 @@
-# Multihop-Routing
+# Multihop-Routing demo using Cooja
 Program that constructs and maintains a routing tree to demonstrate __Many to one Routing__. 
 
 ## Many to one Routing
